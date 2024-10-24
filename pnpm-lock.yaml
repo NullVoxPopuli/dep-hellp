@@ -11,9 +11,6 @@ importers:
       '@manypkg/find-root':
         specifier: ^2.2.3
         version: 2.2.3
-      chalk:
-        specifier: ^5.3.0
-        version: 5.3.0
       resolve-package-path:
         specifier: ^4.0.3
         version: 4.0.3
@@ -37,8 +34,8 @@ importers:
         specifier: ^3.3.3
         version: 3.3.3
       typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
+        specifier: 5.7.0-beta
+        version: 5.7.0-beta
 
 packages:
 
@@ -80,10 +77,6 @@ packages:
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
-
-  chalk@5.3.0:
-    resolution: {integrity: sha512-dLitG79d+GV1Nb/VYcCDFivJeK1hiukt9QjRNVOsUtTy1rR1YJsmpGGTZ3qJos+uw7WmWF4wUwBd9jxjocFC2w==}
-    engines: {node: ^12.17.0 || ^14.13 || >=16.0.0}
 
   fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -167,8 +160,8 @@ packages:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
 
-  typescript@5.6.3:
-    resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
+  typescript@5.7.0-beta:
+    resolution: {integrity: sha512-opDlmEnzKdl082N5piLS43lsyugg0aORdv+XnNzMv5yP5VtBWuZhFDxU8lizmhW+PEFa/fZiShYRBxKsrkTDMQ==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -214,8 +207,6 @@ snapshots:
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
-
-  chalk@5.3.0: {}
 
   fast-glob@3.3.2:
     dependencies:
@@ -286,6 +277,6 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
-  typescript@5.6.3: {}
+  typescript@5.7.0-beta: {}
 
   undici-types@6.19.8: {}

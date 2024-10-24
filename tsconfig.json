@@ -1,6 +1,8 @@
 {
   "extends": ["@tsconfig/strictest", "@tsconfig/node22"],
   "compilerOptions": {
-    "noEmitOnError": false
+    "noEmitOnError": false,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true
   }
 }

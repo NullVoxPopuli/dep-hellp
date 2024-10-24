@@ -1,24 +1,20 @@
 #!/usr/bin/env node
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import { styleText } from "node:util";
 
 import resolvePackagePath from "resolve-package-path";
 import { satisfies } from "semver";
-import { findRoot } from "@manypkg/find-root";
+
+import { DependencyError } from "./error.ts";
+import { CUSTOM_SETTINGS } from "./info.ts";
 
 /**
  * TODO: take arguments, maybe a config file
  */
 const IGNORE = ["webpack"];
 const IGNORE_OVERRIDES = true;
-
-let dir = await findRoot(process.cwd());
-let monorepoInfo = await dir.tool.getPackages(dir.rootDir);
-let root = monorepoInfo.rootPackage;
-
-const CUSTOM_SETTINGS = (root?.packageJson as any).pnpm;
 
 function readJSONSync(filePath: string) {
   let buffer = readFileSync(filePath);
@@ -27,7 +23,7 @@ function readJSONSync(filePath: string) {
 }
 
 class Walker {
-  errors: string[] = [];
+  errors: DependencyError[] = [];
 
   private seen: Map<string, string> = new Map();
 
@@ -41,11 +37,14 @@ class Walker {
     this.seen.set(packageJSONPath, pkg.version);
 
     let root = dirname(packageJSONPath);
+
     this.checkSection("dependencies", pkg, root);
     this.checkSection("peerDependencies", pkg, root);
+
     if (checkDevDependencies) {
       this.checkSection("devDependencies", pkg, root);
     }
+
     return pkg.version;
   }
 
@@ -61,10 +60,10 @@ class Walker {
     for (let name of Object.keys(dependencies)) {
       let range = dependencies[name];
 
-      // Ignore workspace protocol
-      // TODO: but travers its deps
-      //       this is part of "monorepo support"
-      if (range.startsWith("workspace:")) continue;
+      if (range.startsWith("workspace:")) {
+        this.checkDep(packageRoot, name);
+        continue;
+      }
       // For package-aliases (due to bad-actors, etc)
       if (range.startsWith("npm:") && range.includes("@")) {
         let [, rangeOverride] = range.split("@");
@@ -81,10 +80,23 @@ class Walker {
             if (!satisfies(override, range, { includePrerelease: true })) {
               if (!IGNORE_OVERRIDES) {
                 this.errors.push(
-                  `⚠️ [Override] ${styleText("cyanBright", pkg.name)} asked for ${styleText("cyanBright", name)} ${styleText(
-                    "green",
-                    range,
-                  )} but got an overriden version ${styleText("red", version)}\n  - in ${section} at ${humanPath(packageRoot)}`,
+                  new DependencyError(
+                    {
+                      name: pkg.name,
+                      version: pkg.version,
+                      path: packageRoot,
+                    },
+                    {
+                      name,
+                      range,
+                      section,
+                      overrideVersion: override,
+                      result: {
+                        version,
+                        resolvedPath: "todo",
+                      },
+                    },
+                  ),
                 );
               }
             }
@@ -92,10 +104,19 @@ class Walker {
           }
 
           this.errors.push(
-            `${styleText("cyanBright", pkg.name)} asked for ${styleText("cyanBright", name)} ${styleText(
-              "green",
-              range,
-            )} but got ${styleText("red", version)}\n  - in ${section} at ${humanPath(packageRoot)}`,
+            new DependencyError(
+              {
+                name: pkg.name,
+                version: pkg.version,
+                path: packageRoot,
+              },
+              {
+                name,
+                range,
+                section,
+                result: { version, resolvedPath: "todo" },
+              },
+            ),
           );
         }
       } else {
@@ -106,7 +127,18 @@ class Walker {
           !pkg.peerDependenciesMeta?.[name]?.optional
         ) {
           this.errors.push(
-            `${styleText("cyanBright", pkg.name)} is missing ${styleText("red", name)}\n  in ${section} at ${humanPath(packageRoot)}`,
+            new DependencyError(
+              {
+                name: pkg.name,
+                version: pkg.version,
+                path: packageRoot,
+              },
+              {
+                name,
+                range,
+                section,
+              },
+            ),
           );
         }
       }
@@ -134,7 +166,7 @@ async function main() {
   walker.traverse("package.json", true);
 
   if (walker.errors.length > 0) {
-    process.stdout.write(walker.errors.join("\n") + "\n");
+    printErrors(walker);
     depHell();
     process.exit(-1);
   }
@@ -142,22 +174,8 @@ async function main() {
   greatSuccess(`Your node_modules look good`);
 }
 
-function humanPath(path: string) {
-  let prefix = process.cwd();
-  if (path.startsWith(prefix)) {
-    return path.replace(prefix, "$PWD");
-  }
-
-  if (root?.dir && path.startsWith(root.dir)) {
-    let dotPnpm = join(root.dir, "node_modules/.pnpm");
-    if (path.startsWith(dotPnpm)) {
-      return path.replace(dotPnpm, "<.pnpm>");
-    }
-
-    return path.replace(root.dir, "<root>");
-  }
-
-  return path;
+function printErrors(walker: Walker) {
+  process.stdout.write(walker.errors.join("\n") + "\n");
 }
 
 function greatSuccess(msg: string) {
