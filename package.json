@@ -7,8 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "@manypkg/find-root": "^2.2.3",
+    "execa": "^9.4.1",
     "resolve-package-path": "^4.0.3",
-    "semver": "^7.6.3"
+    "semver": "^7.6.3",
+    "yesno": "^0.4.0"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
@@ -19,11 +21,9 @@
     "typescript": "5.7.0-beta"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "index.js.map"
+    "src"
   ],
-  "bin": "./index.js",
+  "bin": "./src/index.js",
   "scripts": {
     "lint": "pnpm prettier --check *.ts",
     "lint:fix": "pnpm prettier --write *.ts",

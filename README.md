@@ -19,6 +19,7 @@ Main changes
 - ESM / type=module
 - Requires Node 22+ 
 - Prettier / more readable output (especially for pnpm)
+- Interactive guidance for fixing the problems
 - Additional support for 
   - monorepos
   - `pnpm.overrides`

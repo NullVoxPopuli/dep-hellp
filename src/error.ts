@@ -44,6 +44,10 @@ export class DependencyError {
     return Boolean(this.requested.overrideVersion);
   }
 
+  get humanSourcePath() {
+    return humanPath(this.source.path);
+  }
+
   toString() {
     if (!this.requested.result) {
       return (

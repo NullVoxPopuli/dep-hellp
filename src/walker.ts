@@ -1,8 +1,5 @@
-#!/usr/bin/env node
-
-import { existsSync, readFileSync } from "node:fs";
 import { dirname } from "node:path";
-import { styleText } from "node:util";
+import { readFileSync } from "node:fs";
 
 import resolvePackagePath from "resolve-package-path";
 import { satisfies } from "semver";
@@ -22,10 +19,15 @@ function readJSONSync(filePath: string) {
   return JSON.parse(buffer.toString());
 }
 
-class Walker {
+export class Walker {
   errors: DependencyError[] = [];
 
   private seen: Map<string, string> = new Map();
+
+  async rerun() {
+    this.seen.clear();
+    this.traverse("package.json", true);
+  }
 
   traverse(packageJSONPath: string, checkDevDependencies = false): string {
     let version = this.seen.get(packageJSONPath);
@@ -148,49 +150,3 @@ class Walker {
     return this.traverse(target);
   }
 }
-
-async function main() {
-  if (!existsSync("package.json")) {
-    process.stderr.write(
-      `You must run this command in a project with a package.json file.`,
-    );
-    process.exit(-1);
-  }
-  let walker = new Walker();
-
-  walker.traverse("package.json", true);
-
-  if (walker.errors.length > 0) {
-    printErrors(walker);
-    depHell();
-    process.exit(-1);
-  }
-
-  greatSuccess(`Your node_modules look good`);
-}
-
-function printErrors(walker: Walker) {
-  process.stdout.write(walker.errors.join("\n") + "\n");
-}
-
-function greatSuccess(msg: string) {
-  console.info(`
-  ✨✨✨
-
-  ${msg}
-
-  ✨✨✨
-`);
-}
-
-function depHell() {
-  console.error(`
-  🔥🔥🔥
-
-  ${styleText("red", "You are in dependency hell")}
-
-  🔥🔥🔥
-`);
-}
-
-main();
