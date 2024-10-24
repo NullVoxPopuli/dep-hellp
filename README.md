@@ -18,5 +18,10 @@ _This is a fork of [are-my-node-modules-messed-up](https://github.com/ef4/are-my
 Main changes
 - ESM / type=module
 - Requires Node 22+ 
-- Support for pnpm's workspace protocol
-- Support for monorepos
+- Prettier / more readable output (especially for pnpm)
+- Additional support for 
+  - pnpm's workspace protocol
+  - monorepos
+  - `pnpm.overrides`
+- Removes `fs-extra`, `chalk`
+

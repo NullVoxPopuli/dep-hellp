@@ -1,16 +1,30 @@
 #!/usr/bin/env node
 
-import { existsSync } from "fs";
-import { readJSONSync } from "fs-extra";
-import { dirname, sep } from "path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { styleText } from "node:util";
+
 import resolvePackagePath from "resolve-package-path";
 import { satisfies } from "semver";
-import chalk from "chalk";
 import { findRoot } from "@manypkg/find-root";
 
-let CUSTOM_SETINGS;
-
+/**
+ * TODO: take arguments, maybe a config file
+ */
 const IGNORE = ["webpack"];
+const IGNORE_OVERRIDES = true;
+
+let dir = await findRoot(process.cwd());
+let monorepoInfo = await dir.tool.getPackages(dir.rootDir);
+let root = monorepoInfo.rootPackage;
+
+const CUSTOM_SETTINGS = (root?.packageJson as any).pnpm;
+
+function readJSONSync(filePath: string) {
+  let buffer = readFileSync(filePath);
+
+  return JSON.parse(buffer.toString());
+}
 
 class Walker {
   errors: string[] = [];
@@ -48,6 +62,8 @@ class Walker {
       let range = dependencies[name];
 
       // Ignore workspace protocol
+      // TODO: but travers its deps
+      //       this is part of "monorepo support"
       if (range.startsWith("workspace:")) continue;
       // For package-aliases (due to bad-actors, etc)
       if (range.startsWith("npm:") && range.includes("@")) {
@@ -59,10 +75,27 @@ class Walker {
 
       if (version) {
         if (!satisfies(version, range, { includePrerelease: true })) {
+          let override = CUSTOM_SETTINGS?.overrides?.[name];
+
+          if (override) {
+            if (!satisfies(override, range, { includePrerelease: true })) {
+              if (!IGNORE_OVERRIDES) {
+                this.errors.push(
+                  `⚠️ [Override] ${styleText("cyanBright", pkg.name)} asked for ${styleText("cyanBright", name)} ${styleText(
+                    "green",
+                    range,
+                  )} but got an overriden version ${styleText("red", version)}\n  - in ${section} at ${humanPath(packageRoot)}`,
+                );
+              }
+            }
+            continue;
+          }
+
           this.errors.push(
-            `${chalk.cyanBright(pkg.name)} asked for ${chalk.cyanBright(name)} ${chalk.green(
+            `${styleText("cyanBright", pkg.name)} asked for ${styleText("cyanBright", name)} ${styleText(
+              "green",
               range,
-            )} but got ${chalk.red(version)}\n  - in ${section} at ${humanPath(packageRoot)}`,
+            )} but got ${styleText("red", version)}\n  - in ${section} at ${humanPath(packageRoot)}`,
           );
         }
       } else {
@@ -73,7 +106,7 @@ class Walker {
           !pkg.peerDependenciesMeta?.[name]?.optional
         ) {
           this.errors.push(
-            `${chalk.cyanBright(pkg.name)} is missing ${chalk.red(name)}\n  in ${section} at ${humanPath(packageRoot)}`,
+            `${styleText("cyanBright", pkg.name)} is missing ${styleText("red", name)}\n  in ${section} at ${humanPath(packageRoot)}`,
           );
         }
       }
@@ -90,12 +123,6 @@ class Walker {
 }
 
 async function main() {
-  let dir = await findRoot(process.cwd());
-  let monorepoInfo = await dir.tool.getPackages(dir.rootDir);
-  let root = monorepoInfo.rootPackage;
-
-  CUSTOM_SETINGS = (root?.packageJson as any).pnpm;
-
   if (!existsSync("package.json")) {
     process.stderr.write(
       `You must run this command in a project with a package.json file.`,
@@ -103,22 +130,54 @@ async function main() {
     process.exit(-1);
   }
   let walker = new Walker();
+
   walker.traverse("package.json", true);
+
   if (walker.errors.length > 0) {
     process.stdout.write(walker.errors.join("\n") + "\n");
-    process.stdout.write(chalk.red("Your node_modules are messed up.\n"));
+    depHell();
     process.exit(-1);
-  } else {
-    process.stdout.write(chalk.green("Your node_modules look good.\n"));
   }
+
+  greatSuccess(`Your node_modules look good`);
 }
 
 function humanPath(path: string) {
-  let prefix = process.cwd() + sep;
+  let prefix = process.cwd();
   if (path.startsWith(prefix)) {
-    return path.slice(prefix.length);
+    return path.replace(prefix, "$PWD");
   }
+
+  if (root?.dir && path.startsWith(root.dir)) {
+    let dotPnpm = join(root.dir, "node_modules/.pnpm");
+    if (path.startsWith(dotPnpm)) {
+      return path.replace(dotPnpm, "<.pnpm>");
+    }
+
+    return path.replace(root.dir, "<root>");
+  }
+
   return path;
+}
+
+function greatSuccess(msg: string) {
+  console.info(`
+  ✨✨✨
+
+  ${msg}
+
+  ✨✨✨
+`);
+}
+
+function depHell() {
+  console.error(`
+  🔥🔥🔥
+
+  ${styleText("red", "You are in dependency hell")}
+
+  🔥🔥🔥
+`);
 }
 
 main();
