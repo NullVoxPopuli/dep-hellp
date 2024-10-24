@@ -26,5 +26,6 @@ Main changes
     - pnpm's workspace protocol
     - `npm:`
     - `link:`
+    - `github:`
 - Removes `fs-extra`, `chalk`
 

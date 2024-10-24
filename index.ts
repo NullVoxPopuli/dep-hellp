@@ -66,6 +66,11 @@ class Walker {
     for (let name of Object.keys(dependencies)) {
       let range = dependencies[name];
 
+      // TODO: is there anything we can do about this?
+      if (range.startsWith("github:")) {
+        continue;
+      }
+
       // TODO: find this directory and keep traversing
       if (range.startsWith("link:")) {
         continue;
