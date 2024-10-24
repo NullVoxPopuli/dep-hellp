@@ -53,6 +53,12 @@ class Walker {
     pkg: any,
     packageRoot: string,
   ): void {
+    let source = {
+      name: pkg.name,
+      version: pkg.version,
+      path: packageRoot,
+    };
+
     let dependencies = pkg[section];
     if (!dependencies) {
       return;
@@ -80,23 +86,16 @@ class Walker {
             if (!satisfies(override, range, { includePrerelease: true })) {
               if (!IGNORE_OVERRIDES) {
                 this.errors.push(
-                  new DependencyError(
-                    {
-                      name: pkg.name,
-                      version: pkg.version,
-                      path: packageRoot,
+                  new DependencyError(source, {
+                    name,
+                    range,
+                    section,
+                    overrideVersion: override,
+                    result: {
+                      version,
+                      resolvedPath: "todo",
                     },
-                    {
-                      name,
-                      range,
-                      section,
-                      overrideVersion: override,
-                      result: {
-                        version,
-                        resolvedPath: "todo",
-                      },
-                    },
-                  ),
+                  }),
                 );
               }
             }
@@ -104,19 +103,12 @@ class Walker {
           }
 
           this.errors.push(
-            new DependencyError(
-              {
-                name: pkg.name,
-                version: pkg.version,
-                path: packageRoot,
-              },
-              {
-                name,
-                range,
-                section,
-                result: { version, resolvedPath: "todo" },
-              },
-            ),
+            new DependencyError(source, {
+              name,
+              range,
+              section,
+              result: { version, resolvedPath: "todo" },
+            }),
           );
         }
       } else {
@@ -127,18 +119,11 @@ class Walker {
           !pkg.peerDependenciesMeta?.[name]?.optional
         ) {
           this.errors.push(
-            new DependencyError(
-              {
-                name: pkg.name,
-                version: pkg.version,
-                path: packageRoot,
-              },
-              {
-                name,
-                range,
-                section,
-              },
-            ),
+            new DependencyError(source, {
+              name,
+              range,
+              section,
+            }),
           );
         }
       }
