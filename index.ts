@@ -66,6 +66,11 @@ class Walker {
     for (let name of Object.keys(dependencies)) {
       let range = dependencies[name];
 
+      // TODO: find this directory and keep traversing
+      if (range.startsWith("link:")) {
+        continue;
+      }
+
       if (range.startsWith("workspace:")) {
         this.checkDep(packageRoot, name);
         continue;

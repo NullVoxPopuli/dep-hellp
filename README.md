@@ -20,8 +20,11 @@ Main changes
 - Requires Node 22+ 
 - Prettier / more readable output (especially for pnpm)
 - Additional support for 
-  - pnpm's workspace protocol
   - monorepos
   - `pnpm.overrides`
+  - additional version specifiers 
+    - pnpm's workspace protocol
+    - `npm:`
+    - `link:`
 - Removes `fs-extra`, `chalk`
 
