@@ -1,4 +1,5 @@
-import yesno from "yesno";
+import { styleText } from "node:util";
+import { confirm, isCancel } from "@clack/prompts";
 import { heh, notice } from "./log.ts";
 import { $ } from "execa";
 
@@ -9,16 +10,15 @@ export async function doIf({
   question: string;
   command: string;
 }) {
-  notice(`
-  I want to run:
-    ${command}
-  `);
-  let result = await yesno({
-    question: `${question} ( y | n )`,
+  notice(`I want to run\n\n\t${styleText("blueBright", command)}\n`);
+
+  let result = await confirm({
+    message: question,
   });
 
-  if (result) {
-    await $({ shell: true })(command);
+  if (result && !isCancel(result)) {
+    await $({ shell: true, stdio: "inherit" })(command);
+    return;
   }
 
   heh("Very well");

@@ -1,11 +1,11 @@
 import { dirname } from "node:path";
-import { readFileSync } from "node:fs";
 
 import resolvePackagePath from "resolve-package-path";
 import { satisfies } from "semver";
 
 import { DependencyError } from "./error.ts";
 import { CUSTOM_SETTINGS } from "./info.ts";
+import { readJSONSync } from "./fs.ts";
 
 /**
  * TODO: take arguments, maybe a config file
@@ -13,19 +13,24 @@ import { CUSTOM_SETTINGS } from "./info.ts";
 const IGNORE = ["webpack"];
 const IGNORE_OVERRIDES = true;
 
-function readJSONSync(filePath: string) {
-  let buffer = readFileSync(filePath);
-
-  return JSON.parse(buffer.toString());
-}
-
 export class Walker {
   errors: DependencyError[] = [];
 
-  private seen: Map<string, string> = new Map();
+  private packageResolveCache = {
+    PATH: new Map(),
+    RESOLVED_PACKAGE_PATH: new Map(),
+    REAL_FILE_PATH: new Map(),
+    REAL_DIRECTORY_PATH: new Map(),
+  };
+  private seen = new Map<string, string>();
 
   async rerun() {
+    this.packageResolveCache.PATH.clear();
+    this.packageResolveCache.REAL_FILE_PATH.clear();
+    this.packageResolveCache.REAL_DIRECTORY_PATH.clear();
+    this.packageResolveCache.REAL_FILE_PATH.clear();
     this.seen.clear();
+    this.errors = [];
     this.traverse("package.json", true);
   }
 
@@ -143,7 +148,11 @@ export class Walker {
   }
 
   private checkDep(packageRoot: string, pkgName: string): string | false {
-    let target = resolvePackagePath(pkgName, packageRoot);
+    let target = resolvePackagePath(
+      pkgName,
+      packageRoot,
+      this.packageResolveCache,
+    );
     if (!target) {
       return false;
     }

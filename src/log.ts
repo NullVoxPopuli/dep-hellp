@@ -11,7 +11,7 @@ export function heh(msg: string) {
 
 export function notice(msg: string) {
   console.info(`
-    ℹ️  ${msg}
+      ${msg}
   `);
 }
 

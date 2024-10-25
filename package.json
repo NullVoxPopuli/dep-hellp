@@ -6,8 +6,10 @@
   "author": "Edward Faulkner <edward@eaf4.com>",
   "license": "MIT",
   "dependencies": {
+    "@clack/prompts": "^0.7.0",
     "@manypkg/find-root": "^2.2.3",
     "execa": "^9.4.1",
+    "latest-version": "^9.0.0",
     "resolve-package-path": "^4.0.3",
     "semver": "^7.6.3",
     "yesno": "^0.4.0"
@@ -25,8 +27,8 @@
   ],
   "bin": "./src/index.js",
   "scripts": {
-    "lint": "pnpm prettier --check *.ts",
-    "lint:fix": "pnpm prettier --write *.ts",
+    "lint": "pnpm prettier --check src/**/*.ts",
+    "lint:fix": "pnpm prettier --write src/**/*.ts",
     "prepare": "tsc",
     "clean": "git clean -x -f"
   },

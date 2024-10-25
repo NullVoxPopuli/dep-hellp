@@ -1,47 +1,17 @@
-import yesno from "yesno";
-import { encourage, heh, notice, ohNo } from "./log.ts";
+import { depHell, greatSuccess, heh, notice, printErrors } from "./log.ts";
 import type { Walker } from "./walker.ts";
 import { doIf } from "./shell.ts";
-import { root, packageManager } from "./info.ts";
+import { ensurePackageManagerField } from "./tasks/add-package-manager-field.ts";
+import { askOrBail, showIntro } from "./prompt.ts";
 
 export async function help(walker: Walker) {
-  if (!root) {
-    ohNo(
-      `Could not find a project. How did we get here? You may want to open an issue.`,
-    );
-    process.exit(-2);
-  }
+  showIntro();
 
-  let userWantsHelp = await yesno({
-    question: `Would you like help resolving the above issues? ( y | n )`,
-  });
+  await askOrBail(`Would you like help resolving the above issues?`, () =>
+    heh("  Good luck"),
+  );
 
-  if (!userWantsHelp) {
-    heh("  Good luck");
-    process.exit(-1);
-  }
-
-  if (!packageManager) {
-    notice(
-      `There is no packageManager field set in the package.json file at ${root.dir}`,
-    );
-    encourage(
-      `Add a "packageManager" field to the package.json and run dephellp again.`,
-    );
-    process.exit(-2);
-  }
-
-  let [packageManagerTool] = packageManager?.split("@");
-
-  if (!packageManagerTool) {
-    ohNo(
-      `Looks like the packageManager field is invalid. Make sure that it matches the format "toolName@version". Example: "pnpm@9.12..2"`,
-    );
-    encourage(
-      `Update the  "packageManager" field in the package.json and run dephellp again.`,
-    );
-    process.exit(-2);
-  }
+  let { packageManager } = await ensurePackageManagerField();
 
   let errors = walker.errors;
   /**
@@ -56,11 +26,30 @@ export async function help(walker: Walker) {
     notice(`It looks like your current directory is missing dependencies.`);
 
     await doIf({
-      question: `Would you like to install them?`,
-      command: `${packageManagerTool} install`,
+      question: `Would you like to install dependencies?`,
+      command: `${packageManager} install`,
     });
   }
 
+  await areWeDoneYet(walker);
+
+  /**
+   * Oh no, we we couldn't do it.
+   */
+  if (walker.errors.length) {
+    printErrors(walker);
+    depHell();
+    heh("You're on your own");
+    process.exit(1);
+  }
+}
+
+async function areWeDoneYet(walker: Walker) {
   notice(`Re-running the dependency scan`);
   await walker.rerun();
+
+  if (walker.errors.length === 0) {
+    greatSuccess(`You did it! Your node_modules look great!`);
+    process.exit(0);
+  }
 }
