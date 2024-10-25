@@ -1,6 +1,5 @@
 import { styleText } from "node:util";
-import { join } from "node:path";
-import { root } from "./info.ts";
+import { humanPath } from "./fs.ts";
 
 interface DependencySource {
   name: string;
@@ -49,12 +48,14 @@ export class DependencyError {
   }
 
   toString() {
+    let styledHumanSource = styleText("gray", this.humanSourcePath);
+    let section = styleText("italic", this.requested.section);
     if (!this.requested.result) {
       return (
         name(this.source.name) +
         ` is missing ${styleText("red", this.requested.name)}` +
-        `\n  in ${this.requested.section}` +
-        ` at ${humanPath(this.source.path)}`
+        `\n  in ${section}` +
+        ` at ${styledHumanSource}`
       );
     }
 
@@ -63,7 +64,7 @@ export class DependencyError {
         `⚠️ [Override] ${name(this.source.name)}` +
         ` asked for ${name(this.requested.name)} ${range(this.requested.range)}` +
         ` but got an overriden version ${wrongVersion(this.requested.result.version)}` +
-        `\n  - in ${this.requested.section} at ${humanPath(this.source.path)}`
+        `\n  - in ${section} at ${styledHumanSource}`
       );
     }
 
@@ -71,25 +72,7 @@ export class DependencyError {
       name(this.source.name) +
       ` asked for ${name(this.requested.name)} ${range(this.requested.range)}` +
       ` but got ${wrongVersion(this.requested.result.version)}` +
-      `\n  - in ${this.requested.section} at ${humanPath(this.source.path)}`
+      `\n  - in ${section} at ${styledHumanSource}`
     );
   }
-}
-
-function humanPath(path: string) {
-  let prefix = process.cwd();
-  if (path.startsWith(prefix)) {
-    return path.replace(prefix, "$PWD");
-  }
-
-  if (root?.dir && path.startsWith(root.dir)) {
-    let dotPnpm = join(root.dir, "node_modules/.pnpm");
-    if (path.startsWith(dotPnpm)) {
-      return path.replace(dotPnpm, "<.pnpm>");
-    }
-
-    return path.replace(root.dir, "<root>");
-  }
-
-  return path;
 }

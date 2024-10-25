@@ -1,11 +1,19 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { depHell, greatSuccess, ohNo, printErrors, yay } from "./log.ts";
+import {
+  depHell,
+  greatSuccess,
+  heading,
+  ohNo,
+  printErrors,
+  yay,
+} from "./log.ts";
 import { help } from "./remediation.ts";
 import { Walker } from "./walker.ts";
 import { monorepoPackages, root } from "./info.ts";
 import { styleText } from "node:util";
 import type { Package } from "@manypkg/get-packages";
+import { humanPath } from "./fs.ts";
 
 export class Runner {
   constructor() {
@@ -77,7 +85,7 @@ export class Runner {
 
     for (let [pkg, walker] of monorepoWalkers.entries()) {
       if (walker.errors.length) {
-        console.log("\n" + fullPackageName(pkg));
+        heading(fullPackageName(pkg));
         printErrors(walker);
       }
     }
@@ -92,7 +100,8 @@ export class Runner {
 }
 
 function fullPackageName(pkg: Package) {
-  console.info(
-    `${styleText("cyanBright", pkg.packageJson.name ?? "<name not set>")} at ${styleText("gray", pkg.dir)}`,
-  );
+  let name = styleText("cyanBright", pkg.packageJson.name ?? "<name not set>");
+  let dir = styleText("gray", humanPath(pkg.dir));
+
+  return `${name} at ${dir}`;
 }

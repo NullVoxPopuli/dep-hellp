@@ -15,6 +15,15 @@ export function notice(msg: string) {
   `);
 }
 
+let top = "🭶";
+let bottom = "🭻";
+export function heading(msg: string) {
+  let length = Math.ceil(msg.length * 0.66);
+  let topLine = new Array(length).fill(top).join("");
+  let bottomLine = new Array(length).fill(bottom).join("");
+  console.info("\n" + topLine + "\n" + msg + "\n" + bottomLine);
+}
+
 export function greatSuccess(msg: string) {
   console.info(`
   ✨✨✨
