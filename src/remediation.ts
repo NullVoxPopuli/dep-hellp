@@ -46,7 +46,7 @@ export async function help(runner: Runner) {
 
 async function areWeDoneYet(runner: Runner) {
   notice(`Re-running the dependency scan`);
-  await runner.run();
+  await runner.rerun();
 
   if (runner.errors.length === 0) {
     greatSuccess(`You did it! Your node_modules look great!`);

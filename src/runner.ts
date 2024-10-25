@@ -27,6 +27,18 @@ export class Runner {
   #lastRun = new Map<Package, Walker>();
 
   async run() {
+    this.rerun();
+    this.printErrors();
+
+    if (this.errors.length > 0) {
+      depHell();
+      await help(this);
+      return;
+    }
+    greatSuccess(`Your node_modules look good`);
+  }
+
+  async rerun() {
     this.#lastRun = new Map<Package, Walker>();
 
     /**
@@ -104,15 +116,6 @@ export class Runner {
         There are ${totalErrors} total errors.
       `);
     }
-
-    this.printErrors();
-
-    if (hasErrors) {
-      depHell();
-      await help(this);
-      return;
-    }
-    greatSuccess(`Your node_modules look good`);
   }
 }
 
