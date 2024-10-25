@@ -30,3 +30,9 @@ Main changes
     - `github:`
 - Removes `fs-extra`, `chalk`
 
+
+## Development
+
+- `pnpm install`
+- in one terminal run: `pnpm prepare --watch`
+- in another terminal run: `~/path/to/this/repo/dist/index.js`
