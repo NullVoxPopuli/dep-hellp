@@ -14,6 +14,9 @@ importers:
       '@manypkg/find-root':
         specifier: ^2.2.3
         version: 2.2.3
+      '@manypkg/get-packages':
+        specifier: ^2.2.2
+        version: 2.2.2
       execa:
         specifier: ^9.4.1
         version: 9.4.1
@@ -61,6 +64,10 @@ packages:
 
   '@manypkg/find-root@2.2.3':
     resolution: {integrity: sha512-jtEZKczWTueJYHjGpxU3KJQ08Gsrf4r6Q2GjmPp/RGk5leeYAA1eyDADSAF+KVCsQ6EwZd/FMcOFCoMhtqdCtQ==}
+    engines: {node: '>=14.18.0'}
+
+  '@manypkg/get-packages@2.2.2':
+    resolution: {integrity: sha512-3+Zd8kLZmsyJFmWTBtY0MAuCErI7yKB2cjMBlujvSVKZ2R/BMXi0kjCXu2dtRlSq/ML86t1FkumT0yreQ3n8OQ==}
     engines: {node: '>=14.18.0'}
 
   '@manypkg/tools@1.1.2':
@@ -362,6 +369,11 @@ snapshots:
 
   '@manypkg/find-root@2.2.3':
     dependencies:
+      '@manypkg/tools': 1.1.2
+
+  '@manypkg/get-packages@2.2.2':
+    dependencies:
+      '@manypkg/find-root': 2.2.3
       '@manypkg/tools': 1.1.2
 
   '@manypkg/tools@1.1.2':

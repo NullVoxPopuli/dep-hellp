@@ -8,6 +8,7 @@
   "dependencies": {
     "@clack/prompts": "^0.7.0",
     "@manypkg/find-root": "^2.2.3",
+    "@manypkg/get-packages": "^2.2.2",
     "execa": "^9.4.1",
     "latest-version": "^9.0.0",
     "resolve-package-path": "^4.0.3",
@@ -23,9 +24,10 @@
     "typescript": "5.7.0-beta"
   },
   "files": [
-    "src"
+    "src",
+    "dist"
   ],
-  "bin": "./src/index.js",
+  "bin": "./dist/index.js",
   "scripts": {
     "lint": "pnpm prettier --check src/**/*.ts",
     "lint:fix": "pnpm prettier --write src/**/*.ts",
