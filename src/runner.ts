@@ -24,7 +24,11 @@ export class Runner {
     }
   }
 
+  #lastRun = new Map<Package, Walker>();
+
   async run() {
+    this.#lastRun = new Map<Package, Walker>();
+
     /**
      * monorepoPackages only includes the root package
      * if the repo is a non-monorepo.
@@ -38,15 +42,34 @@ export class Runner {
     await this.#runSingle();
   }
 
+  get errors() {
+    let result = [];
+    for (let [, walker] of this.#lastRun.entries()) {
+      result.push(...walker.errors);
+    }
+    return result;
+  }
+
+  printErrors() {
+    for (let [pkg, walker] of this.#lastRun.entries()) {
+      if (walker.errors.length) {
+        heading(fullPackageName(pkg));
+        printErrors(walker);
+      }
+    }
+  }
+
   async #runSingle() {
     let walker = new Walker();
 
+    this.#lastRun.set(root, walker);
+
     walker.traverse("package.json", true);
 
+    this.printErrors();
     if (walker.errors.length > 0) {
-      printErrors(walker);
       depHell();
-      await help(walker);
+      await help(this);
       return;
     }
 
@@ -54,13 +77,12 @@ export class Runner {
   }
 
   async #runMonorepo() {
-    let monorepoWalkers = new Map<Package, Walker>();
     let totalErrors = 0;
 
     for (let pkg of [root, ...monorepoPackages]) {
       let walker = new Walker();
 
-      monorepoWalkers.set(pkg, walker);
+      this.#lastRun.set(pkg, walker);
 
       let manifestPath = join(pkg.dir, "package.json");
       console.log(`Scanning ${fullPackageName(pkg)}`);
@@ -83,16 +105,11 @@ export class Runner {
       `);
     }
 
-    for (let [pkg, walker] of monorepoWalkers.entries()) {
-      if (walker.errors.length) {
-        heading(fullPackageName(pkg));
-        printErrors(walker);
-      }
-    }
+    this.printErrors();
 
     if (hasErrors) {
       depHell();
-      // await help(walker);
+      await help(this);
       return;
     }
     greatSuccess(`Your node_modules look good`);
