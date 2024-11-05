@@ -1,6 +1,6 @@
 {
   "name": "dephellp",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "type": "module",
   "repository": "https://github.com/NullVoxPopuli/dep-hellp",
   "author": "Edward Faulkner <edward@eaf4.com>",
@@ -29,9 +29,10 @@
   ],
   "bin": "./dist/index.js",
   "scripts": {
+    "build": "tsc",
     "lint": "pnpm prettier --check src/**/*.ts",
     "lint:fix": "pnpm prettier --write src/**/*.ts",
-    "prepare": "tsc",
+    "prepack": "tsc",
     "clean": "git clean -x -f"
   },
   "packageManager": "pnpm@9.12.2",
