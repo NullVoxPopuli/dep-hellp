@@ -109,13 +109,12 @@ export class Walker {
 
       if (version) {
         if (!satisfies(version, range, { includePrerelease: true })) {
-          if (IGNORE.includes(name)) continue;
-
           let override = CUSTOM_SETTINGS?.overrides?.[name];
 
           if (override) {
             if (!satisfies(override, range, { includePrerelease: true })) {
               if (!IGNORE_OVERRIDES) {
+                if (IGNORE.includes(name)) continue;
                 this.errors.push(
                   new DependencyError(source, {
                     name,
@@ -133,6 +132,7 @@ export class Walker {
             continue;
           }
 
+          if (IGNORE.includes(name)) continue;
           this.errors.push(
             new DependencyError(source, {
               name,
