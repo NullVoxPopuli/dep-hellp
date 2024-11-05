@@ -109,6 +109,8 @@ export class Walker {
 
       if (version) {
         if (!satisfies(version, range, { includePrerelease: true })) {
+          if (IGNORE.includes(name)) continue;
+
           let override = CUSTOM_SETTINGS?.overrides?.[name];
 
           if (override) {
