@@ -10,7 +10,15 @@ import { readJSONSync } from "./fs.ts";
 /**
  * TODO: take arguments, maybe a config file
  */
-const IGNORE = ["webpack", "@pnpm/config", "@pnpm/default-reporter"];
+const IGNORE = [
+  "webpack",
+  "@pnpm/config",
+  "@pnpm/default-reporter",
+  "ramda",
+  "whatwg-url",
+  "ansi-html",
+  "fast-glob",
+];
 const IGNORE_OVERRIDES = true;
 
 export class Walker {
