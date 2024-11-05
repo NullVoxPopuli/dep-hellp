@@ -15,8 +15,12 @@ const IGNORE = [
   "@pnpm/config",
   "@pnpm/default-reporter",
   "ramda",
+  "node-fetch",
   "whatwg-url",
   "ansi-html",
+  "broccoli-middleware",
+  "broccoli",
+  "aws-sdk",
   "fast-glob",
 ];
 const IGNORE_OVERRIDES = true;
