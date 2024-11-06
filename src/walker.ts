@@ -4,7 +4,7 @@ import resolvePackagePath from "resolve-package-path";
 import { satisfies } from "semver";
 
 import { DependencyError } from "./error.ts";
-import { CUSTOM_SETTINGS } from "./info.ts";
+import { overrideFor, satisfiesOverride } from "./info.ts";
 import { readJSONSync } from "./fs.ts";
 
 /**
@@ -109,10 +109,10 @@ export class Walker {
 
       if (version) {
         if (!satisfies(version, range, { includePrerelease: true })) {
-          let override = CUSTOM_SETTINGS?.overrides?.[name];
+          let override = overrideFor(name);
 
           if (override) {
-            if (!satisfies(override, range, { includePrerelease: true })) {
+            if (!satisfiesOverride(name, version)) {
               if (!IGNORE_OVERRIDES) {
                 if (IGNORE.includes(name)) continue;
                 this.errors.push(
