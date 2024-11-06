@@ -9,19 +9,25 @@ import { readJSONSync } from "./fs.ts";
 
 /**
  * TODO: take arguments, maybe a config file
+ * TODO: have a way to expose what this default list is
  */
 const IGNORE = [
   "webpack",
   "@pnpm/config",
   "@pnpm/default-reporter",
   "ramda",
+  // Chronically incorrect
+  "aws-sdk",
+  // Ancient dependencies
+  "fast-glob",
+  "url",
+  "ember-cli",
+  "markdown-it",
   "node-fetch",
   "whatwg-url",
   "ansi-html",
   "broccoli-middleware",
   "broccoli",
-  "aws-sdk",
-  "fast-glob",
 ];
 const IGNORE_OVERRIDES = true;
 
@@ -92,6 +98,11 @@ export class Walker {
 
       // TODO: find this directory and keep traversing
       if (range.startsWith("link:")) {
+        continue;
+      }
+
+      // TODO: download this, and compare with what's on disk
+      if (range.startsWith("https:")) {
         continue;
       }
 

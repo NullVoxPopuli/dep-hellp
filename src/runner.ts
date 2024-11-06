@@ -32,6 +32,15 @@ export class Runner {
 
     if (this.errors.length > 0) {
       depHell();
+
+      if (this.#lastRun.size > 1) {
+        let total = this.#lastRun.size;
+        let totalWithErrors = [...this.#lastRun.values()].filter(
+          (x) => x.errors.length > 0,
+        ).length;
+        console.info(`  ${totalWithErrors} of ${total} packages have errors.`);
+      }
+
       await help(this);
       return;
     }
