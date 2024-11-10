@@ -19,6 +19,8 @@ const IGNORE = [
   // Chronically incorrect
   "aws-sdk",
   // Ancient dependencies
+  "router_js",
+  "rsvp",
   "fast-glob",
   "url",
   "ember-cli",
